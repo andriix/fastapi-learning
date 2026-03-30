@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 from scalar_fastapi import get_scalar_api_reference
 
 
@@ -25,6 +26,15 @@ def get_shipment(id: int) -> dict[str, Any]:
         "content": "wooden table",
         "status": "in transit"
     }
+
+
+class ShipmentCreate(BaseModel):
+    content: str
+    weight: float
+
+@app.post("/shipments", status_code=201)
+def create_shipment(shipment: ShipmentCreate):
+    return shipment
 
 
 # Scalar API Documentation
