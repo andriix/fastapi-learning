@@ -39,7 +39,7 @@ async def submit_shipment(shipment: ShipmentCreate, session: SessionDep) -> dict
 
 ### Update fields of a shipment
 @router.patch("/shipment", response_model=ShipmentRead)
-def update_shipment(id: int, shipment_update: ShipmentUpdate, session: SessionDep):
+async def update_shipment(id: int, shipment_update: ShipmentUpdate, session: SessionDep):
     # Update data with given fields
     update = shipment_update.model_dump(exclude_none=True)
 
@@ -49,21 +49,21 @@ def update_shipment(id: int, shipment_update: ShipmentUpdate, session: SessionDe
             detail="No data provided to update",
         )
 
-    shipment = session.get(Shipment, id)
+    shipment = await session.get(Shipment, id)
     shipment.sqlmodel_update(update)
 
     session.add(shipment)
-    session.commit()
-    session.refresh(shipment)
+    await session.commit()
+    await session.refresh(shipment)
 
     return shipment
 
 
 ### Delete a shipment by id
 @router.delete("/shipment")
-def delete_shipment(id: int, session: SessionDep) -> dict[str, str]:
+async def delete_shipment(id: int, session: SessionDep) -> dict[str, str]:
     # Remove from database
-    session.delete(session.get(Shipment, id))
-    session.commit()
+    await session.delete(await session.get(Shipment, id))
+    await session.commit()
 
     return {"detail": f"Shipment with id #{id} is deleted!"}
