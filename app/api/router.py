@@ -1,8 +1,8 @@
-import datetime
 from fastapi import APIRouter, HTTPException, status
 
+from app.api.dependencies import ServiceDep
 from app.api.schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentUpdate
-from app.database.models import Shipment, ShipmentStatus
+from app.database.models import Shipment
 from app.database.session import SessionDep
 from app.services.shipment import ShipmentService
 
@@ -10,9 +10,9 @@ router = APIRouter()
 
 ### Read a shipment by id
 @router.get("/shipment", response_model=Shipment)
-async def get_shipment(id: int, session: SessionDep):
+async def get_shipment(id: int, service: ServiceDep):
     # Check for shipment with given id
-    shipment = ShipmentService(session).get(id)
+    shipment = await service.get(id)
 
     if shipment is None:
         raise HTTPException(
@@ -25,13 +25,13 @@ async def get_shipment(id: int, session: SessionDep):
 
 ### Create a new shipment with content and weight
 @router.post("/shipment")
-async def submit_shipment(shipment: ShipmentCreate, session: SessionDep) -> Shipment:
-    return await ShipmentService(session).add(shipment)
+async def submit_shipment(shipment: ShipmentCreate, service: ServiceDep) -> Shipment:
+    return await service.add(shipment)
 
 
 ### Update fields of a shipment
 @router.patch("/shipment", response_model=ShipmentRead)
-async def update_shipment(id: int, shipment_update: ShipmentUpdate, session: SessionDep):
+async def update_shipment(id: int, shipment_update: ShipmentUpdate, service: ServiceDep):
     # Update data with given fields
     update = shipment_update.model_dump(exclude_none=True)
 
@@ -41,15 +41,15 @@ async def update_shipment(id: int, shipment_update: ShipmentUpdate, session: Ses
             detail="No data provided to update",
         )
 
-    shipment = await ShipmentService(session).update(shipment_update)
+    shipment = await service.update(id, update)
     
     return shipment
 
 
 ### Delete a shipment by id
 @router.delete("/shipment")
-async def delete_shipment(id: int, session: SessionDep) -> dict[str, str]:
+async def delete_shipment(id: int, service: ServiceDep) -> dict[str, str]:
     # Remove from database
-    await ShipmentService(session).delete(id)
+    await service.delete(id)
 
     return {"detail": f"Shipment with id #{id} is deleted!"}

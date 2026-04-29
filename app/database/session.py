@@ -1,6 +1,3 @@
-from typing import Annotated, TypeAlias
-
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
@@ -19,7 +16,7 @@ engine = create_async_engine(
 
 async def create_db_tables():
     async with engine.begin() as connection:
-        from .models import Shipment  # noqa: F401
+        from app.api.schemas.shipment import Shipment
         connection.run_sync(SQLModel.metadata.create_all)
 
 
@@ -33,7 +30,3 @@ async def get_session():
 
     async with async_session() as session:
         yield session
-
-
-# Session Dependency Annotation
-SessionDep: TypeAlias = Annotated[AsyncSession, Depends(get_session)]
