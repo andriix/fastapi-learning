@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.api.schemas.shipment import ShipmentCreate
 from app.database.models import Shipment, ShipmentStatus
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,7 @@ class ShipmentService:
         new_shipment = Shipment(
             **shipment_create.model_dump(),
             status=ShipmentStatus.placed,
-            estimated_delivery=datetime.now() + datetime.timedelta(days=3),
+            estimated_delivery=datetime.now() + timedelta(days=3),
         )
         self.session.add(new_shipment)
         await self.session.commit()
