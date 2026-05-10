@@ -10,14 +10,14 @@ engine = create_async_engine(
     url=settings.POSTGRES_URL,
     # Log sql queries
     echo=True,
-    connect_args={"check_same_thread": False},
+    #connect_args={"check_same_thread": False},
 )
 
 
 async def create_db_tables():
     async with engine.begin() as connection:
-        from app.api.schemas.shipment import Shipment
-        connection.run_sync(SQLModel.metadata.create_all)
+        from app.database.models import Shipment
+        await connection.run_sync(SQLModel.metadata.create_all)
 
 
 # Session to interact with database
