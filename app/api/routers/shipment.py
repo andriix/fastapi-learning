@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
 
-from ..dependencies import ServiceDep
+from ..dependencies import ShipmentServiceDep
 from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentUpdate
 
 router = APIRouter()
 
+
 ### Read a shipment by id
 @router.get("/shipment", response_model=ShipmentRead)
-async def get_shipment(id: int, service: ServiceDep):
+async def get_shipment(id: int, service: ShipmentServiceDep):
     # Check for shipment with given id
     shipment = await service.get(id)
 
@@ -22,13 +23,17 @@ async def get_shipment(id: int, service: ServiceDep):
 
 ### Create a new shipment with content and weight
 @router.post("/shipment")
-async def submit_shipment(shipment: ShipmentCreate, service: ServiceDep) -> ShipmentCreate:
+async def submit_shipment(
+    shipment: ShipmentCreate, service: ShipmentServiceDep
+) -> ShipmentCreate:
     return await service.add(shipment)
 
 
 ### Update fields of a shipment
 @router.patch("/shipment", response_model=ShipmentRead)
-async def update_shipment(id: int, shipment_update: ShipmentUpdate, service: ServiceDep):
+async def update_shipment(
+    id: int, shipment_update: ShipmentUpdate, service: ShipmentServiceDep
+):
     # Update data with given fields
     update = shipment_update.model_dump(exclude_none=True)
 
@@ -39,13 +44,13 @@ async def update_shipment(id: int, shipment_update: ShipmentUpdate, service: Ser
         )
 
     shipment = await service.update(id, update)
-    
+
     return shipment
 
 
 ### Delete a shipment by id
 @router.delete("/shipment")
-async def delete_shipment(id: int, service: ServiceDep) -> dict[str, str]:
+async def delete_shipment(id: int, service: ShipmentServiceDep) -> dict[str, str]:
     # Remove from database
     await service.delete(id)
 
